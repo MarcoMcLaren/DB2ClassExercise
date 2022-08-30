@@ -55,12 +55,13 @@ namespace DB2ClassExercise.Data
             try
             {
                 openConnection();
-                SqlCommand command = new SqlCommand("select * from Courses", currConnection);
+                SqlCommand command = new SqlCommand("Select * from Courses", currConnection);
                 using (SqlDataReader reader = command.ExecuteReader()) //lees van databasisse gebruik ExcecuteRader, NA databasis stuur ExcecuteNonQuery
                 {
                     while (reader.Read())
                     {
                         Course tmpDest = new Course();
+                        tmpDest.Id = Convert.ToInt32(reader["ID"]);
                         tmpDest.Name = reader["Name"].ToString();
                         tmpDest.Description = reader["Description"].ToString();
                         data.Add(tmpDest);
@@ -75,31 +76,37 @@ namespace DB2ClassExercise.Data
         }
 
         //TODO: Uncommment and complete this
-
-        public List<Course> getAssignmentsOfCourse(int courseID)
+        public List<DataVM> getAssignmentsOfCourse(int courseID)
         {
-            Course dest = null;
-            List <Course> assignments = new List<Course> ();
-            if (assignments.Any(d => d.Id == courseID))
+            List<DataVM> data = new List<DataVM>();
+            try
             {
-                int index = assignments.FindIndex(d => d.Id == courseID);
-                dest = assignments[index];
+                openConnection();
+                SqlCommand command = new SqlCommand(@"SELECT Courses.Name, Courses.Description, Staff.Name, Students.Name from CourseAssignmentsMarking
+                inner join Courses on Courses.ID = CourseAssignmentsMarking.CourseID
+                inner join Staff on Staff.ID = CourseAssignmentsMarking.MarkerID
+                inner join Students on Students.ID = CourseAssignmentsMarking.StudentID
+                where CourseAssignmentsMarking.CourseID = '"+courseID+"'", currConnection);
+                using (SqlDataReader reader = command.ExecuteReader()) //lees van databasisse gebruik ExcecuteRader, NA databasis stuur ExcecuteNonQuery
+                {
+                    while (reader.Read())
+                    {
+                        DataVM tmpDest = new DataVM();
+                        tmpDest.Name = reader[0].ToString();
+                        tmpDest.Description = reader[1].ToString();
+                        tmpDest.LecturerName = reader[2].ToString();
+                        tmpDest.StudentName = reader[3].ToString();
+                        data.Add(tmpDest);
+                    }
+                }
+                closeConnection();
             }
-            return assignments;
+            catch
+            {
+            }
+            return data;
+
         }
 
-        //public Course getAssignmentsOfCourse(int courseID)
-        //{
-        //    Course dest = null;
-        //    List<Course> assignments = getAvailableCourses();
-
-        //    if (assignments.Any(d => d.Id == courseID))
-        //    {
-        //        int index = assignments.FindIndex(d => d.Id == courseID);
-        //        dest = assignments[index];
-        //    }
-
-        //    return dest;
-        //}
     }
 }

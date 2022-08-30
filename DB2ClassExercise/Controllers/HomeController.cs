@@ -25,7 +25,7 @@ namespace DB2ClassExercise.Controllers
         ///Complete this
         public ActionResult ViewCourse(int courseID)
         {
-            List<Course> courseAssignmnts = dataService.getAssignmentsOfCourse(courseID);
+            List<DataVM> courseAssignmnts = dataService.getAssignmentsOfCourse(courseID);
             return View(courseAssignmnts);
         }
 
